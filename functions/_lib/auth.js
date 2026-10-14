@@ -1,0 +1,8 @@
+const enc = new TextEncoder();
+function b64url(bytes) { return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function unb64url(s) { s=s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4)s+='='; return Uint8Array.from(atob(s),c=>c.charCodeAt(0)); }
+export function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}})}
+async function hmacKey(secret){return crypto.subtle.importKey('raw',enc.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify'])}
+export async function makeToken(env){const payload=b64url(enc.encode(JSON.stringify({exp:Date.now()+7*24*60*60*1000,scope:'studio'})));const sig=await crypto.subtle.sign('HMAC',await hmacKey(env.BP_SESSION_SECRET),enc.encode(payload));return payload+'.'+b64url(sig)}
+export async function validToken(request,env){try{const h=request.headers.get('Authorization')||'';if(!h.startsWith('Bearer '))return false;const token=h.slice(7);const parts=token.split('.');if(parts.length!==2)return false;const key=await hmacKey(env.BP_SESSION_SECRET);const ok=await crypto.subtle.verify('HMAC',key,unb64url(parts[1]),enc.encode(parts[0]));if(!ok)return false;const payload=JSON.parse(new TextDecoder().decode(unb64url(parts[0])));return payload.scope==='studio'&&payload.exp>Date.now()}catch{return false}}
+export async function requireAuth(request,env){if(!env.BP_SESSION_SECRET)return json({error:'BP_SESSION_SECRET is not configured.'},500);if(!await validToken(request,env))return json({error:'Login required or session expired.'},401);return null}
