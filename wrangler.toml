@@ -6,4 +6,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "bridal-pavilion-studio"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "b6a6232d-9878-495f-95f0-65f60b0983db"
