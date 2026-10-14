@@ -2,7 +2,7 @@ name = "bridal-pavilion-studio"
 compatibility_date = "2026-10-14"
 pages_build_output_dir = "."
 
-# After creating a Cloudflare D1 database, replace DATABASE_ID with the actual ID.
+# After creating a Cloudflare D1 database, replace DATABASE_ID b6a6232d-9878-495f-95f0-65f60b0983db.
 [[d1_databases]]
 binding = "DB"
 database_name = "bridal-pavilion-studio"
